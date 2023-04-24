@@ -1,0 +1,66 @@
+<mat-grid-list cols="2" rowHeight="1:1">
+  <mat-grid-tile>
+    <div class="tile-content">
+
+      <mat-toolbar color="accent">
+        <span>Actions</span>
+      </mat-toolbar>
+
+      <mat-table [dataSource]="dataSource">
+        <ng-container matColumnDef="position">
+          <mat-header-cell *matHeaderCellDef>Action Order</mat-header-cell>
+          <mat-cell *matCellDef="let element">{{element.position}}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="action">
+          <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <mat-select [(value)]="element.action">
+              <mat-option *ngFor="let action of actionTypes" [value]="action">{{ action }}</mat-option>
+            </mat-select>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      </mat-table>
+    </div>
+  </mat-grid-tile>
+  <mat-grid-tile>
+    <div class="tile-content">
+
+      <mat-toolbar color="accent">
+        <span>Triggers</span>
+      </mat-toolbar>
+
+      <mat-list>
+        <mat-list-item *ngFor="let action of actionTypes" class="trigger-card">
+          <ng-container *ngIf="action !== ''">
+            <mat-card>
+              <div class="card-content">
+                <mat-card-header>
+                  <div style="display: flex; align-items: center; width: 100%;">
+                    <mat-card-title-group>
+                      <mat-card-title>{{ action }}</mat-card-title>
+                      <mat-card-subtitle>{{ actionDescriptions[action] }}</mat-card-subtitle>
+                    </mat-card-title-group>
+                    <span style="flex-grow: 1;"></span> <!-- Add a spacer to push input to the right -->
+                    <div style="display: flex; flex-direction: column;"> <!-- Update this div -->
+                      <span>{{ action }} Trigger</span>
+                      <input [(ngModel)]="actionTriggers[action]">
+                    </div>
+                  </div>
+                </mat-card-header>
+              </div>
+            </mat-card>
+          </ng-container>
+        </mat-list-item>
+      </mat-list>
+
+
+
+
+
+    </div>
+  </mat-grid-tile>
+</mat-grid-list>

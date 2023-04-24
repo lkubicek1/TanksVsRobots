@@ -1,0 +1,28 @@
+.trigger-card {
+  min-height: 100px;
+  margin-bottom: 16px;
+}
+
+.tile-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 600px;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  align-content: center;
+}
+
+mat-toolbar {
+  flex-shrink: 0;
+}
+
+mat-table,
+mat-list {
+  flex-grow: 1;
+  overflow-y: auto;
+}
