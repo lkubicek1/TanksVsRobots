@@ -22,7 +22,9 @@
                         style="font-size: 72px; height: 100%; width: 100%">{{robot.direction.toString()}}</mat-icon>
 
               <ng-container *ngFor="let entity of [tank1, tank2, tank3, tank4]">
-                <img *ngIf="i === entity.position" [src]="getTankImage(entity)"  [style]="{ 'opacity': 0.6 }" class="tank"/>
+                <img *ngIf="i === entity.position" [src]="getTankImage(entity)"
+                     [style]="{ 'opacity': 0.6 }"
+                     [style.background-color]="entity.hitPoints[entity.hitPoints.length - 1] === 0 ? 'red' : 'none'" class="tank"/>
               </ng-container>
 
               <div *ngIf="i >= 56 && !(rangeDamage.indexOf(i) > -1)" class="robot-end">
@@ -65,7 +67,7 @@
           <mat-card style="background-color: whitesmoke; margin-top: 5px;">
             <mat-card-header style="display: flex; align-items: center;">
               <div class="robot-control-header-content">
-                <mat-card-title>Robot Controls</mat-card-title>
+                <mat-card-title>Robot Controls | Actions Left in Current Turn: {{controller[robot.id].movesLeft}}</mat-card-title>
                 <mat-card-subtitle style="color: black;">Next Action: {{getActionDescription()}}</mat-card-subtitle>
                 <mat-card-subtitle style="color: black; margin-bottom: 21px;">Trigger: {{getTriggerDescription()}}</mat-card-subtitle>
               </div>
@@ -87,7 +89,7 @@
             <div [style.border]="entity.id === gameState.turn ? '2px solid red' : '2px solid gray'">
               <div style="padding: 5px;">
                 <div>
-                  <span>{{entity.id}} Turn Control</span>
+                  <span>{{entity.id}} Control | Actions Left in Current Turn: {{controller[entity.id].movesLeft}}</span>
                 </div>
 
                 <div>

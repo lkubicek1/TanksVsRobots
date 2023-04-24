@@ -9,6 +9,9 @@ export enum DirectionIcon {
   LEFT = 'arrow_back'
 }
 
+const GAME_OVER_ROBOT_WINS = "GAME OVER: Robot wins!";
+const GAME_OVER_TANKS_WINS = "GAME OVER: Tanks wins!";
+
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -108,15 +111,21 @@ export class GameComponent implements OnInit {
     range: 4
   }
 
-
-
   controller: any = {
     'Robot': this.robotController,
     'Tank 1': this.tank1Controller,
     'Tank 2': this.tank2Controller,
     'Tank 3': this.tank3Controller,
     'Tank 4': this.tank4Controller
-}
+  }
+
+  entities: any = {
+    'Robot': this.robot,
+    'Tank 1': this.tank1,
+    'Tank 2': this.tank2,
+    'Tank 3': this.tank3,
+    'Tank 4': this.tank4
+  }
 
   rangeDamage: number[] = [];
   mineLocations: number[] = [];
@@ -254,7 +263,7 @@ export class GameComponent implements OnInit {
       for(let i = 0; i < this.rangeDamage.length; i++) {
         setTimeout(() => {
           this.rangeDamage.splice(0, 1); // Remove one item from the array
-        }, 50 * i);
+        }, 100 * i);
       }
       this.cycleTurn(entity);
     }
@@ -296,50 +305,62 @@ export class GameComponent implements OnInit {
 
   moveEntity(entity: { position: number, direction: DirectionIcon, hitPoints: number [], id: string}) {
     if(this.hasPermission(entity)) {
-      switch (entity.direction) {
-        case DirectionIcon.DOWN: {
-          if(entity.position <= 56) {
-            let newPosition: number = entity.position + 8;
-            if(this.getCurrentPositions().indexOf(newPosition) === -1) {
-              entity.position = newPosition;
-            }
-          }
-        }
-          break;
-        case DirectionIcon.UP: {
-          if(entity.position > 8) {
-            let newPosition: number = entity.position - 8;
-            if(this.getCurrentPositions().indexOf(newPosition) === -1) {
-              entity.position = newPosition;
-            }
-          }
-        }
-          break;
-        case DirectionIcon.RIGHT: {
-          if((entity.position + 1) % 8 !== 0) {
-            let newPosition: number = entity.position + 1;
-            if(this.getCurrentPositions().indexOf(newPosition) === -1) {
-              entity.position = newPosition;
-            }
-          }
-        }
-          break;
-        case DirectionIcon.LEFT: {
-          if(entity.position % 8 !== 0) {
-            let newPosition: number = entity.position - 1;
-            if(this.getCurrentPositions().indexOf(newPosition) === -1) {
-              entity.position = newPosition;
-            }
-          }
+
+      let moves = 1;
+
+      if(entity.id !== 'Robot') {
+        if(entity.hitPoints[2] !== 0) {
+          moves = 2;
         }
       }
 
-      let potentialMine = this.mineLocations.indexOf(entity.position);
+      for(let i = 0; i < moves; i++) {
+        switch (entity.direction) {
+          case DirectionIcon.DOWN: {
+            if(entity.position <= 56) {
+              let newPosition: number = entity.position + 8;
+              if(this.getCurrentPositions().indexOf(newPosition) === -1) {
+                entity.position = newPosition;
+              }
+            }
+          }
+            break;
+          case DirectionIcon.UP: {
+            if(entity.position > 8) {
+              let newPosition: number = entity.position - 8;
+              if(this.getCurrentPositions().indexOf(newPosition) === -1) {
+                entity.position = newPosition;
+              }
+            }
+          }
+            break;
+          case DirectionIcon.RIGHT: {
+            if((entity.position + 1) % 8 !== 0) {
+              let newPosition: number = entity.position + 1;
+              if(this.getCurrentPositions().indexOf(newPosition) === -1) {
+                entity.position = newPosition;
+              }
+            }
+          }
+            break;
+          case DirectionIcon.LEFT: {
+            if(entity.position % 8 !== 0) {
+              let newPosition: number = entity.position - 1;
+              if(this.getCurrentPositions().indexOf(newPosition) === -1) {
+                entity.position = newPosition;
+              }
+            }
+          }
+        }
 
-      if(potentialMine !== -1) {
-        this.mineLocations.splice(potentialMine, 1);
-        this.applyAoeDamage(entity.position, 1, true);
+        let potentialMine = this.mineLocations.indexOf(entity.position);
+
+        if(potentialMine !== -1) {
+          this.mineLocations.splice(potentialMine, 1);
+          this.applyAoeDamage(entity.position, 1, true);
+        }
       }
+
       this.cycleTurn(entity);
     }
   }
@@ -378,7 +399,7 @@ export class GameComponent implements OnInit {
         case ActionType.Move.toString():
           this.moveEntity(this.robot);
           if(this.robot.position >= 56) {
-            this.gameState.status = "GAME OVER: Robot wins!";
+            this.gameState.status = GAME_OVER_ROBOT_WINS
             this.gameState.turn = "GAME OVER";
             return;
           }
@@ -394,17 +415,23 @@ export class GameComponent implements OnInit {
     }
   }
 
-  skipAction(entity: {id:string}): void {
+  skipAction(entity: {id:string, hitPoints: number[]}): void {
     if(this.hasPermission(entity)) {
       this.cycleTurn(entity);
     }
   }
 
-  hasPermission(entity: {id:string}): boolean {
+  hasPermission(entity: {id:string, hitPoints: number[]}): boolean {
+    if(this.gameState.turn !== entity.id) return false;
+
+    if(entity.hitPoints[entity.hitPoints.length - 1] === 0) {
+      this.gameState.turn = this.controller[entity.id].nextEntity;
+    }
+
     return this.gameState.turn === entity.id;
   }
 
-  cycleTurn(entity: {id:string}): void {
+  cycleTurn(entity: {id:string, hitPoints: number[]}): void {
       if(this.controller[entity.id].movesLeft <= 1) {
         if(entity.id == this.robot.id) {
           this.controller[entity.id].movesLeft = this.maxActions;
@@ -413,6 +440,8 @@ export class GameComponent implements OnInit {
         }
 
         this.gameState.turn = this.controller[entity.id].nextEntity;
+        if(!this.checkGameState()) return;
+
       } else {
         this.controller[entity.id].movesLeft--;
         this.controller[entity.id].action++;
@@ -420,6 +449,39 @@ export class GameComponent implements OnInit {
           this.controller[entity.id].action = 1;
         }
       }
+  }
+
+  checkGameState(): boolean {
+    if(this.robot.hitPoints[this.robot.hitPoints.length - 1] === 0) {
+      this.gameState.status = GAME_OVER_TANKS_WINS;
+      this.gameState.turn = "GAME OVER";
+      return false;
+    }
+
+    let tanksAlive = [this.tank1, this.tank2, this.tank3, this.tank4]
+      .filter(tank => tank.hitPoints[tank.hitPoints.length - 1] !== 0)
+      .length > 0;
+
+    if(!tanksAlive) {
+      this.gameState.status = GAME_OVER_ROBOT_WINS;
+      this.gameState.turn = "GAME OVER";
+      return false;
+    }
+
+    let nextEntity = this.entities[this.gameState.turn];
+
+    while(nextEntity.hitPoints[nextEntity.hitPoints.length - 1] === 0) {
+      if(nextEntity.id === this.robot.id) {
+        this.gameState.status = GAME_OVER_TANKS_WINS;
+        this.gameState.turn = "GAME OVER";
+        return false;
+      } // Probably should never happen
+
+      this.gameState.turn = this.controller[nextEntity.id].nextEntity;
+      nextEntity = this.entities[this.gameState.turn];
+    }
+
+    return true;
   }
 
 }
