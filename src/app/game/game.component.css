@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  width: 600px;
+  width: 700px;
 }
 
 .game-container {
@@ -13,7 +13,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  width: 600px;
+  width: 700px;
 }
 
 .game-title {
@@ -32,10 +32,16 @@
   background-color: #ccc;
 }
 
-.laser-active {
+.damage-active {
   width: 100%;
   height: 100%;
   background-color: red;
+}
+
+.tank {
+  width: 100%; /* Set the width to 100% of the parent div cell */
+  height: 100%; /* Set the height to 100% of the parent div cell */
+  object-fit: contain; /* Ensure the image maintains its aspect ratio while fitting within the div cell */
 }
 
 .robot {
@@ -72,3 +78,43 @@
   justify-content: center;
   width: 100%;
 }
+
+/* Override default mat-chip styles */
+::ng-deep .green-chip.mat-chip {
+  background-color: green !important;
+  color: white !important;
+}
+
+::ng-deep .yellow-chip.mat-chip {
+  background-color: yellow !important;
+  color: black !important;
+}
+
+::ng-deep .red-chip.mat-chip {
+  background-color: red !important;
+  color: white !important;
+}
+
+.control-button-row {
+  display: table-cell;
+  max-width: 600px;
+}
+
+.control-button-row .mat-mdc-button-base {
+  margin: 8px 8px 8px 0;
+}
+
+.robot-control-header-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.robot-control-actions {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+

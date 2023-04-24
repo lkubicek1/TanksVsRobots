@@ -12,11 +12,13 @@ export class InstructionsService {
       action: ActionType.None,
     }))
   );
+  public readonly instructions$: Observable<Instruction[]> = this._instructions$.asObservable();
 
   private _actionTriggers = new BehaviorSubject<{ [key: string]: string }>({});
   public readonly actionTriggers$ = this._actionTriggers.asObservable();
 
-  public readonly instructions$: Observable<Instruction[]> = this._instructions$.asObservable();
+  private _maxActions = new BehaviorSubject<number>(10);
+  public readonly maxActions$ = this._maxActions.asObservable();
 
   constructor() {}
 

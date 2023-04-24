@@ -24,6 +24,9 @@
         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
         <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
       </mat-table>
+      <mat-toolbar color="accent">
+        <span>Maximum Actions Per Turn:</span><input style="width: 21px; margin-left: 12px;" [(ngModel)]="maxActions">
+      </mat-toolbar>
     </div>
   </mat-grid-tile>
   <mat-grid-tile>

@@ -4,23 +4,37 @@
       <div class="game-board">
         <mat-grid-list cols="8" gutterSize="1px" rowHeight="1:1">
           <mat-toolbar color="accent" class="game-title">
-            <span>Game Board</span>
+            <span>Game Board | Status: {{gameState.status}}</span>
           </mat-toolbar>
           <mat-grid-tile *ngFor="let cell of Array(64); let i = index">
             <div class="cell">
+
               <div *ngIf="i === 4" class="robot-start">Robot Start</div>
-              <img *ngIf="i === robotPosition" [ngSrc]="'assets/robot.png'" [style]="{ 'opacity': 0.6 }" class="robot"
+
+              <img *ngIf="mineLocations.indexOf(i) > -1" [ngSrc]="'assets/mine.png'" [style]="{ 'opacity': 0.6 }"
+                   class="robot"
                    fill
-                   ngSrc="assets/robot.png"/>
-              <mat-icon *ngIf="i === robotPosition"
-                        style="font-size: 72px; height: 100%; width: 100%">{{robotDirection.toString()}}</mat-icon>
-              <div *ngIf="i >= 56 && !(laserShot.indexOf(i) > -1)" class="robot-end">
-                <div *ngIf="i === 56 || i === 63" class="robot-goal">Robot Goal</div>
+                   ngSrc="assets/mine.png"/>
+
+              <img *ngIf="i === robot.position" [ngSrc]="getRobotImage()" [style]="{ 'opacity': 0.6 }" class="robot"
+                   fill/>
+              <mat-icon *ngIf="i === robot.position"
+                        style="font-size: 72px; height: 100%; width: 100%">{{robot.direction.toString()}}</mat-icon>
+
+              <ng-container *ngFor="let entity of [tank1, tank2, tank3, tank4]">
+                <img *ngIf="i === entity.position" [src]="getTankImage(entity)"  [style]="{ 'opacity': 0.6 }" class="tank"/>
+              </ng-container>
+
+              <div *ngIf="i >= 56 && !(rangeDamage.indexOf(i) > -1)" class="robot-end">
               </div>
-              <div *ngIf="laserShot.indexOf(i) > -1" class="laser-active"></div>
+
+              <div *ngIf="rangeDamage.indexOf(i) > -1" class="damage-active"></div>
+              <div *ngIf="aoeDamage.indexOf(i) > -1" class="damage-active"></div>
+
             </div>
           </mat-grid-tile>
         </mat-grid-list>
+        <div>Robot Goal</div>
       </div>
     </mat-grid-tile>
     <mat-grid-tile>
@@ -30,29 +44,96 @@
           <span>Game Controls</span>
         </mat-toolbar>
 
-        <mat-grid-list cols="1" rowHeight="50px">
-          <mat-grid-tile>
-            <mat-grid-list cols="10" rowHeight="50px">
-              <mat-grid-tile *ngFor="let hitPoint of robotHitPoints; let hp = index">
-                <mat-card>
-                  <mat-card-header>
-                    <mat-card-subtitle>
-                      <div *ngIf="hitPoint > 0" style="font-size: 36px; height: 36px">{{10 - hp}}</div>
+        <div style="padding: 5px;" [style.border]="'Robot' === gameState.turn ? '2px solid red' : 'none'">
+          <span>Robot HP</span>
+
+          <mat-chip-listbox>
+            <mat-chip
+              *ngFor="let hitPoint of robot.hitPoints; let hp = index"
+              [selected]=true
+              [ngClass]="{
+            'green-chip': 10 - hp > 7 && hitPoint != 0,
+            'yellow-chip': 10 - hp >= 4 && 10 - hp <= 7 && hitPoint != 0,
+            'red-chip': 10 - hp < 4 && hitPoint != 0
+            }"
+            >
+              <mat-icon *ngIf="hitPoint === 0">clear_disabled</mat-icon>
+              <mat-icon *ngIf="hitPoint === 1">check_circle_outline</mat-icon>
+              <span>{{10 - hp}}</span>
+            </mat-chip>
+          </mat-chip-listbox>
+          <mat-card style="background-color: whitesmoke; margin-top: 5px;">
+            <mat-card-header style="display: flex; align-items: center;">
+              <div class="robot-control-header-content">
+                <mat-card-title>Robot Controls</mat-card-title>
+                <mat-card-subtitle style="color: black;">Next Action: {{getActionDescription()}}</mat-card-subtitle>
+                <mat-card-subtitle style="color: black; margin-bottom: 21px;">Trigger: {{getTriggerDescription()}}</mat-card-subtitle>
+              </div>
+              <mat-card-actions class="robot-control-actions">
+                <div class="button-text">Should the action trigger?</div>
+                <div>
+                  <button mat-raised-button style="background-color: green; margin: 5px;" (click)="executeRobotAction()">EXECUTE</button>
+                  <button mat-raised-button (click)="skipAction(robot)">SKIP</button>
+                </div>
+              </mat-card-actions>
+            </mat-card-header>
+          </mat-card>
+
+        </div>
+
+        <div>
+
+          <ng-container *ngFor="let entity of [tank1, tank2, tank3, tank4]">
+            <div [style.border]="entity.id === gameState.turn ? '2px solid red' : '2px solid gray'">
+              <div style="padding: 5px;">
+                <div>
+                  <span>{{entity.id}} Turn Control</span>
+                </div>
+
+                <div>
+                  <mat-chip-listbox>
+                    <mat-chip
+                      *ngFor="let hitPoint of entity.hitPoints; let hp = index"
+                      [selected]=true
+                      [ngClass]="{
+            'green-chip': 4 - hp > 3 && hitPoint != 0,
+            'yellow-chip': 4 - hp >= 2 && 4 - hp <= 3 && hitPoint != 0,
+            'red-chip': 4 - hp < 2 && hitPoint != 0
+            }"
+                    >
                       <mat-icon *ngIf="hitPoint === 0">clear_disabled</mat-icon>
-                    </mat-card-subtitle>
-                  </mat-card-header>
-                </mat-card>
-              </mat-grid-tile>
-            </mat-grid-list>
-          </mat-grid-tile>
-          <mat-grid-tile>
-            <button mat-raised-button color="warn" (click)="hurtRobot()">Hurt Robot</button>
-            <button mat-raised-button color="warn" (click)="moveRobot()">Move Robot</button>
-            <button mat-raised-button color="warn" (click)="rotateRobot()">Rotate Robot</button>
-            <button mat-raised-button color="warn" (click)="laserEye()">Shoot Laser</button>
-            <button mat-raised-button color="warn" (click)="resetGame()">Reset Game</button>
-          </mat-grid-tile>
-        </mat-grid-list>
+                      <mat-icon *ngIf="hitPoint === 1">check_circle_outline</mat-icon>
+                      <span>{{4 - hp}}</span>
+                    </mat-chip>
+                  </mat-chip-listbox>
+                </div>
+
+                <section>
+                  <div class="control-button-row">
+                    <button mat-raised-button color="warn" (click)="moveEntity(entity)">Move</button>
+                    <button mat-raised-button color="warn" (click)="rotateEntity(entity, false)">Rotate CCW</button>
+                    <button mat-raised-button color="warn" (click)="rotateEntity(entity)">Rotate CW</button>
+                    <button mat-raised-button color="warn" (click)="applyRangeDamage(entity)">Shoot Cannon</button>
+                    <button mat-raised-button color="warn" (click)="skipAction(entity)">Skip</button>
+                  </div>
+                </section>
+
+              </div>
+
+            </div>
+          </ng-container>
+        </div>
+
+
+        <div [style.border]="'2px solid gray'">
+          <div>Game Controls</div>
+          <section>
+            <div class="control-button-row">
+              <button mat-raised-button color="warn" (click)="resetGame()">Reset Game</button>
+              <button mat-raised-button color="warn" (click)="getCurrentPositions()">Get Positions</button>
+            </div>
+          </section>
+        </div>
 
 
       </div>

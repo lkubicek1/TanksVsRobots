@@ -18,6 +18,8 @@ import {MatSelectModule} from "@angular/material/select";
 import {FormsModule} from "@angular/forms";
 import {MatButtonModule} from "@angular/material/button";
 import {NgOptimizedImage} from "@angular/common";
+import {MatChipsModule} from "@angular/material/chips";
+import {MatLegacyChipsModule} from "@angular/material/legacy-chips";
 
 @NgModule({
   declarations: [
@@ -40,7 +42,9 @@ import {NgOptimizedImage} from "@angular/common";
     MatSelectModule,
     FormsModule,
     MatButtonModule,
-    NgOptimizedImage
+    NgOptimizedImage,
+    MatChipsModule,
+    MatLegacyChipsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
