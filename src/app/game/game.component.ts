@@ -440,6 +440,7 @@ export class GameComponent implements OnInit {
         }
 
         this.gameState.turn = this.controller[entity.id].nextEntity;
+        this.gameState.status = this.gameState.turn + " turn...";
         if(!this.checkGameState()) return;
 
       } else {
@@ -478,6 +479,7 @@ export class GameComponent implements OnInit {
       } // Probably should never happen
 
       this.gameState.turn = this.controller[nextEntity.id].nextEntity;
+      this.gameState.status = this.gameState.turn + " turn...";
       nextEntity = this.entities[this.gameState.turn];
     }
 

@@ -2,8 +2,8 @@ export enum ActionType {
   LaserEye = 'Laser Eye',
   Fist = 'Fist',
   AtomicMine = 'Atomic Mine',
-  RotateCW = 'Rotate Clock-wise',
-  RotateCCW = 'Rotate Counter Clock-wise',
+  RotateCW = 'Rotate CW',
+  RotateCCW = 'Rotate CCW',
   Move = 'Move',
   None = ''
 }

@@ -6,7 +6,7 @@
         <span>Actions</span>
       </mat-toolbar>
 
-      <mat-table [dataSource]="dataSource">
+      <mat-table [dataSource]="dataSource" style="max-height: 550px; margin-top: 12px; margin-bottom: 12px">
         <ng-container matColumnDef="position">
           <mat-header-cell *matHeaderCellDef>Action Order</mat-header-cell>
           <mat-cell *matCellDef="let element">{{element.position}}</mat-cell>

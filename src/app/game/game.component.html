@@ -16,7 +16,10 @@
                    fill
                    ngSrc="assets/mine.png"/>
 
-              <img *ngIf="i === robot.position" [ngSrc]="getRobotImage()" [style]="{ 'opacity': 0.6 }" class="robot"
+              <img *ngIf="i === robot.position"
+                   [ngSrc]="getRobotImage()"
+                   [style]="{ 'opacity': 0.6 }" class="robot"
+                   [style.background-color]="robot.hitPoints[robot.hitPoints.length - 1] === 0 ? 'red' : 'none'"
                    fill/>
               <mat-icon *ngIf="i === robot.position"
                         style="font-size: 72px; height: 100%; width: 100%">{{robot.direction.toString()}}</mat-icon>
